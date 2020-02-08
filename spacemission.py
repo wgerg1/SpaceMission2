@@ -1,13 +1,14 @@
 from objects import *
 from gamemap import *
+from scenery import *
 
 WIDTH = 800
 HEIGHT = 600
 roommap = []
 roomheight = 7
 roomwidth = 10
-roomnumber = 33
-OBJECT_LIST = [images.floor, images.pillar, images.soil]
+roomnumber = 45
+OBJECT_LIST = objects
 TILE_SIZE = 30
 top_left_x = 100
 top_left_y = 150
@@ -17,7 +18,7 @@ def draw():
         for i in range(roomheight):
             for j in range(roomwidth):
                 tiledata = roommap[i][j]
-                screen.blit(OBJECT_LIST[tiledata], (j * TILE_SIZE + top_left_x, i * TILE_SIZE - OBJECT_LIST[tiledata].get_height() + top_left_y))
+                screen.blit(OBJECT_LIST[tiledata][0], (j * TILE_SIZE + top_left_x, i * TILE_SIZE - OBJECT_LIST[tiledata][0].get_height() + top_left_y))
 
 def generate_room():
     global roommap, roomwidth, roomheight
@@ -54,5 +55,27 @@ def generate_room():
         roommap[exitpos][roomwidth-1] = floor_material
         roommap[exitpos+1][roomwidth-1] = floor_material
         roommap[exitpos+1][roomwidth-1] = floor_material
+    #add fence where needed
+    #top fence
+    if roomnumber < 6:
+        temprow = []
+        for i in range(roomwidth):
+            temprow.append(31)
+        roommap[0] = temprow.copy()
+    if roomnumber < 26:
+        #left fence
+        if roomnumber % 5 == 1:
+            for row in roommap:
+                row[0] = 31
+        #right fence
+        if roomnumber % 5 == 0:
+            for row in roommap:
+                row[roomwidth-1] = 31
+    #add scenery
+    if roomnumber in scenery:
+        scenlist = scenery[roomnumber]
+        for scenitem in scenlist: #scenitem is a mini list
+            roommap[scenitem[1]][scenitem[2]] = scenitem[0]
+
     print(roommap)
 generate_room()

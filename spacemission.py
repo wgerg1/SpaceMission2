@@ -22,8 +22,11 @@ playerOffsetX = 0
 playerOffsetY = 0
 playerDirection = "right"
 playerFrame = 0
+PlayerOldX = 5
+PlayerOldY = 2
 
 def draw():
+    screen.clear()
     if len(roommap) > 0:
         for i in range(roomheight):
             for j in range(roomwidth):
@@ -95,7 +98,7 @@ def generate_room():
     print(roommap)
 
 def game_loop():
-    global playerDirection, playerX, playerY, playerOffsetX, playerOffsetY, playerFrame
+    global playerDirection, playerX, playerY, playerOffsetX, playerOffsetY, playerFrame, PlayerOldX, PlayerOldY, roomnumber
 
     if playerFrame > 0:
         playerFrame += 1
@@ -105,6 +108,8 @@ def game_loop():
             playerOffsetX = 0
             playerOffsetY = 0
     if playerFrame == 0:
+        PlayerOldX = playerX
+        playerOldY = playerY
         if keyboard.right:
             playerDirection = "right"
             playerX +=1
@@ -121,7 +126,36 @@ def game_loop():
             playerDirection = "up"
             playerY -=1
             playerFrame = 1
+        if roommap[playerY][playerX] not in items_player_may_stand_on:
+            playerX = PlayerOldX
+            playerY = PlayerOldY
+            playerFrame = 0
+        else:
 
+            if playerY == 0:
+                roomnumber -= 5
+                generate_room()
+                playerY = GAME_MAP[roomnumber][1] - 2
+                playerX = GAME_MAP[roomnumber][2]//2
+                playerframe =0
+            if playerY == GAME_MAP[roomnumber][1]:
+                roomnumber += 5
+                generate_room()
+                playerY = 0
+                playerX = GAME_MAP[roomnumber][2]//2
+            if playerX == GAME_MAP[roomnumber][2] - 1:
+                playerframe =0
+                roomnumber += 1
+                generate_room()
+                playerX = 0
+                playerY = GAME_MAP[roomnumber][1]//2
+                playerframe =0
+            if playerX == -1:
+                roomnumber == 1
+                generate_room()
+                playerX = GAME_MAP[roomnumber][2]-2
+                playerY = GAME_MAP[roomnumber][1]//2
+                playerframe =0
     if playerFrame > 0 and playerDirection == "right":
         playerOffsetX = -1 + (0.25 * playerFrame)
     if playerFrame > 0 and playerDirection == "left":

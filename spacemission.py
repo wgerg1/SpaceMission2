@@ -26,6 +26,8 @@ PlayerOldX = 5
 PlayerOldY = 2
 
 def draw():
+    box = Rect((0,150), (WIDTH, HEIGHT))
+    screen.draw.filled_rect(box, (0,0,0))
     screen.clear()
     if len(roommap) > 0:
         for i in range(roomheight):
@@ -40,6 +42,7 @@ def draw():
 
 def generate_room():
     global roommap, roomwidth, roomheight
+    roommap = []
     roomwidth = GAME_MAP[roomnumber][2]
     roomheight = GAME_MAP[roomnumber][1]
     temprow = []
@@ -62,17 +65,31 @@ def generate_room():
     for i in range(roomwidth):
         temprow.append(wall_material)
     roommap.append(temprow)
-
+    #add building for rooms 21-25
+    if roomnumber >= 21 and roomnumber <=25:
+        for i in range (roomwidth):
+            roommap[roomheight - 1][i] = 1
     #add in exits
     if GAME_MAP[roomnumber][3]: #data position of top exit
         exitpos = roomwidth // 2 #floor division
         roommap[0][exitpos] = floor_material
         roommap[0][exitpos+1] = floor_material
+    if roomnumber < 46: #bottom exits don't exist on bottom row
+        if GAME_MAP[roomnumber+5][3]: #data position of top exit
+            exitpos = roomwidth // 2 #floor division
+            roommap[roomheight - 1][exitpos] = floor_material
+            roommap[roomheight - 1][exitpos+1] = floor_material
     if GAME_MAP[roomnumber][4]: #right exit
         exitpos = roomheight // 2
         roommap[exitpos][roomwidth-1] = floor_material
         roommap[exitpos+1][roomwidth-1] = floor_material
         roommap[exitpos+1][roomwidth-1] = floor_material
+    if roomnumber % 5 != 1:
+        if GAME_MAP[roomnumber - 1][4]:
+            exitpos = roomheight // 2
+            roommap[exitpos][0] = floor_material
+            roommap[exitpos+1][0] = floor_material
+            roommap[exitpos+1][0] = floor_material
     #add fence where needed
     #top fence
     if roomnumber < 6:
@@ -89,7 +106,9 @@ def generate_room():
         if roomnumber % 5 == 0:
             for row in roommap:
                 row[roomwidth-1] = 31
-    #add scenery
+
+
+  #add scenery
     if roomnumber in scenery:
         scenlist = scenery[roomnumber]
         for scenitem in scenlist: #scenitem is a mini list
@@ -126,36 +145,39 @@ def game_loop():
             playerDirection = "up"
             playerY -=1
             playerFrame = 1
-        if roommap[playerY][playerX] not in items_player_may_stand_on:
-            playerX = PlayerOldX
-            playerY = PlayerOldY
-            playerFrame = 0
-        else:
 
-            if playerY == 0:
-                roomnumber -= 5
-                generate_room()
-                playerY = GAME_MAP[roomnumber][1] - 2
-                playerX = GAME_MAP[roomnumber][2]//2
-                playerframe =0
-            if playerY == GAME_MAP[roomnumber][1]:
-                roomnumber += 5
-                generate_room()
-                playerY = 0
-                playerX = GAME_MAP[roomnumber][2]//2
-            if playerX == GAME_MAP[roomnumber][2] - 1:
-                playerframe =0
-                roomnumber += 1
-                generate_room()
-                playerX = 0
-                playerY = GAME_MAP[roomnumber][1]//2
-                playerframe =0
-            if playerX == -1:
-                roomnumber == 1
-                generate_room()
-                playerX = GAME_MAP[roomnumber][2]-2
-                playerY = GAME_MAP[roomnumber][1]//2
-                playerframe =0
+    if playerY == -1:
+        roomnumber -= 5
+        generate_room()
+        playerY = GAME_MAP[roomnumber][1] - 2
+        playerX = GAME_MAP[roomnumber][2]//2
+        playerframe =0
+
+    if playerY == GAME_MAP[roomnumber][1]:
+        roomnumber += 5
+        generate_room()
+        playerY = 0
+        playerX = GAME_MAP[roomnumber][2]//2
+        #RIGHT
+    if playerX == GAME_MAP[roomnumber][2]:
+        playerframe =0
+        roomnumber += 1
+        generate_room()
+        playerX = 0
+        playerY = GAME_MAP[roomnumber][1]//2
+        playerframe = -1
+        #LEFT
+    if playerX == -1:
+        roomnumber -= 1
+        generate_room()
+        playerX = GAME_MAP[roomnumber][2]-2
+        playerY = GAME_MAP[roomnumber][1]//2
+        playerframe = 0
+
+    if roommap[playerY][playerX] not in items_player_may_stand_on:
+        playerX = PlayerOldX
+        playerY = PlayerOldY
+        playerFrame = 0
     if playerFrame > 0 and playerDirection == "right":
         playerOffsetX = -1 + (0.25 * playerFrame)
     if playerFrame > 0 and playerDirection == "left":

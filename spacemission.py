@@ -25,31 +25,72 @@ playerFrame = 0
 PlayerOldX = 5
 PlayerOldY = 2
 
+
+###PILLARS###
+PILLARS = [images.pillar, images.pillar_95, images.pillar_80, images.pillar_60, images.pillar_50]
+pillarFrame = 0
 def draw_image(image, x, y):
     screen.blit(image, (top_left_x + x * TILE_SIZE, top_left_y + (y * TILE_SIZE) - image.get_height()))
+
+def draw_shadow(image, x, y):
+     screen.blit(image, (top_left_x + x * TILE_SIZE, top_left_y + (y * TILE_SIZE)))
+
 def draw_player():
     p_img = PLAYER[playerDirection][playerFrame]
     draw_image(p_img, playerX + playerOffsetX, playerY +playerOffsetY)
+    p_shw_img = PLAYER_SHADOW[playerDirection][playerFrame]
+    draw_shadow(p_shw_img, playerX + playerOffsetX, playerY + playerOffsetY)
 
 def draw():
     floor_material = get_floor_material()
     box = Rect((0,150), (WIDTH, HEIGHT))
     screen.draw.filled_rect(box, (0,0,0))
     screen.clear()
+
     if len(roommap) > 0:
         for i in range(roomheight):
             for j in range(roomwidth):
                 draw_image(OBJECT_LIST[floor_material][0], j, i)
 
-        for i in range(roomheight):
-            for j in range(roomwidth):
-                tiledata = roommap[i][j]
+                if roomnumber == 26:
+                    if i == 8 and j == 2:
+                        pp_img = OBJECT_LIST[39][0]
+                        draw_image(pp_img, j, i)
 
-                if tiledata not in items_player_may_stand_on + [255]:
+            for i in range(roomheight):
+                for j in range(roomwidth):
+                    tiledata = roommap[i][j]
+                    if tiledata not in items_player_may_stand_on + [255]:
+                        obj_img = OBJECT_LIST[tiledata][0]
+                        draw_image(obj_img, j , i)
 
-                    draw_image(OBJECT_LIST[tiledata][0],j , i)
-            if playerY == i:
-                draw_player()
+                        #front wall transparency
+                        if i == roomheight - 1 and roommap[i][j] == 1:
+                            obj_images = PILLARS[pillarFrame]
+
+
+                #add a shadow if needed
+                        if OBJECT_LIST[tiledata][1]:
+                            shadow_image = (OBJECT_LIST[tiledata][1])
+                            if shadow_image in [images.full_shadow, images.half_shadow]:
+                                shadow_width = int(obj_img.get_width() / TILE_SIZE)
+                                for z in range(shadow_width):
+                                    draw_shadow(shadow_image, j + z, i)
+                            else:
+                                draw_shadow(shadow_image, j, i)
+                if playerY == i:
+                    draw_player()
+
+def adjust_w_fade():
+    global pillarFrame
+
+    #fade out
+
+
+
+    #fade in
+    if (playerY < roomheight -2 or roommap[roomheight -1[playerX] != 1) and pillarFrame > 0:
+
 def get_floor_material():
     floor_material =0
     if roomnumber < 26:
